@@ -152,7 +152,7 @@ void scan(FILE* fp, Node** head, Node** tail) {
 int main() {
     FILE* fp = fopen("test.c", "r");
     if (!fp) {
-        fprintf(stderr, "Cannot open source file.\n");
+        fprintf(stderr, "Cannot open source file. Edit line 153 in HW1.c as needed\n");
         return 1;
     }
 
