@@ -81,7 +81,7 @@ void add_token(token_data** arg, char* token, Token_Type Token_Type);
 void list_token(token_data* head);
 void free_token_list(token_data* head);
 
-char* Get_Token_Type(Token_Type Token_Type);
+char* get_token_type(Token_Type Token_Type);
 
 int main() {
     FILE* fp = fopen("test.c", "r");
@@ -445,7 +445,7 @@ int main() {
 void list_token(token_data* head) {
     token_data* current = head;
     while (current != NULL) {
-        printf("%s: %s\n", current->token, Get_Token_Type(current->token_type));
+        printf("%s: %s\n", current->token, get_token_type(current->token_type));
         current = current->next;
     }
 }
@@ -478,7 +478,7 @@ void add_token(token_data** arg, char* token,Token_Type Token_Type) {
     }
 }
 
-char* Get_Token_Type(Token_Type Token_Type) {
+char* get_token_type(Token_Type Token_Type) {
     switch (Token_Type) {
         case TYPE_TOKEN:
             return "TYPE_TOKEN";
