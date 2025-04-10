@@ -77,9 +77,9 @@ int is_operator(char c) {
     return false;
 }
 
-void add_token(token_data** arg, char* token, Token_Type Token_Type);
-void list_token(token_data* head);
-void free_token_list(token_data* head);
+void append_token(token_data** arg, char* token, Token_Type Token_Type);
+void display_tokens(token_data* head);
+void release_token(token_data* head);
 
 char* get_token_type(Token_Type Token_Type);
 
@@ -108,7 +108,7 @@ int main() {
     // }
 
     //hash
-    char tmp;
+    char chr;
     token_data* head = NULL;
 
     char record[100] = {0};
@@ -118,319 +118,319 @@ int main() {
     while (true) {
         switch (state) {
             case 0:
-                tmp = getc(fp);
-                if (is_whitespace(tmp)) {
+                chr = getc(fp);
+                if (is_whitespace(chr)) {
                     state = 0; 
                     break;
                 }
-                else if (tmp == EOF) {
+                else if (chr == EOF) {
                     state = 39;
                     break;
                 }
-                else if (tmp == '+') state = 1;
-                else if (tmp == '-') state = 2;
-                else if (tmp == '=') state = 3;
-                else if (tmp == '<') state = 6;
-                else if (tmp == '>') state = 9;
-                else if (is_digit(tmp)) state = 12;
-                else if (is_symbol(tmp)) state = 14;
-                else if (tmp == 'e') state = 15;
-                else if (tmp == 'i') state = 18;
-                else if (tmp == 'm') state = 20;
-                else if (tmp == 'w') state = 23;
-                else if (is_alpha(tmp)) state = 37;
+                else if (chr == '+') state = 1;
+                else if (chr == '-') state = 2;
+                else if (chr == '=') state = 3;
+                else if (chr == '<') state = 6;
+                else if (chr == '>') state = 9;
+                else if (is_digit(chr)) state = 12;
+                else if (is_symbol(chr)) state = 14;
+                else if (chr == 'e') state = 15;
+                else if (chr == 'i') state = 18;
+                else if (chr == 'm') state = 20;
+                else if (chr == 'w') state = 23;
+                else if (is_alpha(chr)) state = 37;
                 
-                record[index] = tmp;
+                record[index] = chr;
                 index++;
                 break;
             case 1:
                 state = 0;
                 record[index] = '\0';
-                add_token(&head, record, PLUS_TOKEN);
+                append_token(&head, record, PLUS_TOKEN);
                 index = 0;
                 break;
             case 2:
                 state = 0;
                 record[index] = '\0';
-                add_token(&head, record, MINUS_TOKEN);
+                append_token(&head, record, MINUS_TOKEN);
                 index = 0;
                 break;
             case 3:
-                tmp = getc(fp);
-                if (tmp == '=') state = 4;
+                chr = getc(fp);
+                if (chr == '=') state = 4;
                 else state = 5;
-                record[index] = tmp;
+                record[index] = chr;
                 index++;
                 break;
             case 4:
                 state = 0;
                 record[index] = '\0';
-                add_token(&head, record, EQUAL_TOKEN);
+                append_token(&head, record, EQUAL_TOKEN);
                 index = 0;
                 break;
             case 5:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, ASSIGN_TOKEN);
+                append_token(&head, record, ASSIGN_TOKEN);
                 index = 0;
                 break;
             case 6:
-                tmp = getc(fp);
-                if (tmp == '=') state = 7;
+                chr = getc(fp);
+                if (chr == '=') state = 7;
                 else state = 8;
-                record[index] = tmp;
+                record[index] = chr;
                 index++;
                 break;
             case 7:
                 state = 0;
                 record[index] = '\0';
-                add_token(&head, record, LESSEQUAL_TOKEN);
+                append_token(&head, record, LESSEQUAL_TOKEN);
                 index = 0;
                 break;
             case 8:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, LESS_TOKEN);
+                append_token(&head, record, LESS_TOKEN);
                 index = 0;
                 break;
             case 9:
-                tmp = getc(fp);
-                if (tmp == '=') state = 10;
+                chr = getc(fp);
+                if (chr == '=') state = 10;
                 else state = 11;
-                record[index] = tmp;
+                record[index] = chr;
                 index++;
                 break;
             case 10:
                 state = 0;
                 record[index] = '\0';
-                add_token(&head, record, GREATEREQUAL_TOKEN);
+                append_token(&head, record, GREATEREQUAL_TOKEN);
                 index = 0;
                 break;
             case 11:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, GREATER_TOKEN);
+                append_token(&head, record, GREATER_TOKEN);
                 index = 0;
                 break;
             case 12:
-                tmp = getc(fp);
-                if (is_digit(tmp)) state = 12;
-                if (is_operator(tmp)) state = 13;
-                if (is_special_char(tmp)) state = 13;
-                if (is_alpha(tmp)) state = ERROR_STATE;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_digit(chr)) state = 12;
+                if (is_operator(chr)) state = 13;
+                if (is_special_char(chr)) state = 13;
+                if (is_alpha(chr)) state = ERROR_STATE;
+                record[index] = chr;
                 index++;
                 break;
             case 13:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, LITERAL_TOKEN);
+                append_token(&head, record, LITERAL_TOKEN);
                 index = 0;
                 break;
             case 14:
                 state = 0;
                 record[index] = '\0';
-                if (tmp == '{') add_token(&head, record, LEFTBRACE_TOKEN);
-                if (tmp == '}') add_token(&head, record, RIGHTBRACE_TOKEN);
-                if (tmp == '(') add_token(&head, record, LEFTPAREN_TOKEN);
-                if (tmp == ')') add_token(&head, record, RIGHTPAREN_TOKEN);
-                if (tmp == ';') add_token(&head, record, SEMICOLON_TOKEN);
+                if (chr == '{') append_token(&head, record, LEFTBRACE_TOKEN);
+                if (chr == '}') append_token(&head, record, RIGHTBRACE_TOKEN);
+                if (chr == '(') append_token(&head, record, LEFTPAREN_TOKEN);
+                if (chr == ')') append_token(&head, record, RIGHTPAREN_TOKEN);
+                if (chr == ';') append_token(&head, record, SEMICOLON_TOKEN);
                 index = 0;
                 break;
             case 15:
-                tmp = getc(fp);
-                if (tmp == 'l') state = 16;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'l') state = 16;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 16:
-                tmp = getc(fp);
-                if (tmp == 's') state = 17;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 's') state = 17;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 17:
-                tmp = getc(fp);
-                if (tmp == 'e') state = 27;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'e') state = 27;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 18:
-                tmp = getc(fp);
-                if (tmp == 'f') state = 28;
-                else if (tmp == 'n') state = 19;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'f') state = 28;
+                else if (chr == 'n') state = 19;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 19:
-                tmp = getc(fp);
-                if (tmp == 't') state = 29;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 't') state = 29;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 20:
-                tmp = getc(fp);
-                if (tmp == 'a') state = 21;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'a') state = 21;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 21:
-                tmp = getc(fp);
-                if (tmp == 'i') state = 22;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'i') state = 22;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 22:
-                tmp = getc(fp);
-                if (tmp == 'n') state = 30;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'n') state = 30;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 23:
-                tmp = getc(fp);
-                if (tmp == 'h') state = 24;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'h') state = 24;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 24:
-                tmp = getc(fp);
-                if (tmp == 'i') state = 25;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'i') state = 25;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 25:
-                tmp = getc(fp);
-                if (tmp == 'l') state = 26;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'l') state = 26;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 26:
-                tmp = getc(fp);
-                if (tmp == 'e') state = 31;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (chr == 'e') state = 31;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 27:
-                tmp = getc(fp);
-                if (is_special_char(tmp)) state = 32;
-                if (is_operator(tmp)) state = 32;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_special_char(chr)) state = 32;
+                if (is_operator(chr)) state = 32;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                record[index] = chr;
                 index++;
                 break;
             case 28:
-                tmp = getc(fp);
-                if (is_special_char(tmp)) state = 33;
-                if (is_operator(tmp)) state = 33;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_special_char(chr)) state = 33;
+                if (is_operator(chr)) state = 33;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                record[index] = chr;
                 index++;
                 break;
             case 29:
-                tmp = getc(fp);
-                if (is_special_char(tmp)) state = 34;
-                if (is_operator(tmp)) state = 34;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_special_char(chr)) state = 34;
+                if (is_operator(chr)) state = 34;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                record[index] = chr;
                 index++;
                 break;
             case 30:
-                tmp = getc(fp);
-                if (is_special_char(tmp)) state = 35;
-                if (is_operator(tmp)) state = 35;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_special_char(chr)) state = 35;
+                if (is_operator(chr)) state = 35;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                record[index] = chr;
                 index++;
                 break;
             case 31:
-                tmp = getc(fp);
-                if (is_special_char(tmp)) state = 36;
-                if (is_operator(tmp)) state = 36;
-                else if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_special_char(chr)) state = 36;
+                if (is_operator(chr)) state = 36;
+                else if (is_alpha(chr) || is_digit(chr)) state = 37;
+                record[index] = chr;
                 index++;
                 break;
             case 32:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, ELSE_TOKEN);
+                append_token(&head, record, ELSE_TOKEN);
                 index = 0;
                 break;
             case 33:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, IF_TOKEN);
+                append_token(&head, record, IF_TOKEN);
                 index = 0;
                 break;
             case 34:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, TYPE_TOKEN);
+                append_token(&head, record, TYPE_TOKEN);
                 index = 0;
                 break;
             case 35:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, MAIN_TOKEN);
+                append_token(&head, record, MAIN_TOKEN);
                 index = 0;
                 break;
             case 36:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, WHILE_TOKEN);
+                append_token(&head, record, WHILE_TOKEN);
                 index = 0;
                 break;
             case 37:
-                tmp = getc(fp);
-                if (is_alpha(tmp) || is_digit(tmp)) state = 37;
-                else if (is_special_char(tmp) || is_operator(tmp)) state = 38;
-                record[index] = tmp;
+                chr = getc(fp);
+                if (is_alpha(chr) || is_digit(chr)) state = 37;
+                else if (is_special_char(chr) || is_operator(chr)) state = 38;
+                record[index] = chr;
                 index++;
                 break;
             case 38:
                 state = 0;
-                ungetc(tmp, fp);
+                ungetc(chr, fp);
                 record[--index] = '\0';
-                add_token(&head, record, ID_TOKEN);
+                append_token(&head, record, ID_TOKEN);
                 index = 0;
                 break;
             case 39:
                 fclose(fp);
-                list_token(head);
-                free_token_list(head);
+                display_tokens(head);
+                release_token(head);
                 return 0;
                 break;
             default:
@@ -442,7 +442,7 @@ int main() {
 }
 
 //print node
-void list_token(token_data* head) {
+void display_tokens(token_data* head) {
     token_data* current = head;
     while (current != NULL) {
         printf("%s: %s\n", current->token, get_token_type(current->token_type));
@@ -451,7 +451,7 @@ void list_token(token_data* head) {
 }
 
 //free node
-void free_token_list(token_data* head) {
+void release_token(token_data* head) {
     token_data* current = head;
     token_data* next;
     while (current != NULL) {
@@ -461,7 +461,7 @@ void free_token_list(token_data* head) {
     }
 }
 
-void add_token(token_data** arg, char* token,Token_Type Token_Type) {
+void append_token(token_data** arg, char* token,Token_Type Token_Type) {
     token_data* new_token = (token_data*)malloc(sizeof(token_data));
     strcpy(new_token->token, token);
     new_token->token_type = Token_Type;
